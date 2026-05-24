@@ -244,10 +244,13 @@ public class ConfigurationWindow : Window, IDisposable
         {
             SaveLayoutManager.ImportLayout(Config.SaveLocation);
             Log($"Imported {Plugin.InteriorItemList.Count + Plugin.ExteriorItemList.Count} items");
+            
+            if (CheckModeForPreview())
+                Plugin.PreviewItems();
         }
         catch (Exception e)
         {
-            
+            LogError($"Apply Preview Error: {e.Message}", e.StackTrace);
         }
     }
 
@@ -447,7 +450,7 @@ public class ConfigurationWindow : Window, IDisposable
         menuDimensions.X);
 
         var ctrlKeyPressed = ImGui.GetIO().KeyCtrl;
-        var dyeingItems = ReMakePlacePlugin.CurrentlyDyeingItems;
+        var dyeingItems = CurrentlyDyeingItems;
 
         DrawMainMenuButton(dyeingItems ? "Stop Dyeing" : "Apply Dyes", () =>
         {
@@ -465,6 +468,8 @@ public class ConfigurationWindow : Window, IDisposable
         dyeingItems ? "Will stop applying Dyes to furnitures" :
             (ctrlKeyPressed ? "Attempt to apply dyes, Furnishing Color window needs to be open" : "Hold CTRL to apply dyes"),
         menuDimensions.X);
+        
+        DrawMainMenuButton("Preview Layout", ApplyPreviewFromFile, false, "Preview the layout!", menuDimensions.X);
 
         //DrawMainMenuButton("Place Items Down", () =>
         //{

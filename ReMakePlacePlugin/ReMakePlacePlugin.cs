@@ -148,6 +148,7 @@ public class ReMakePlacePlugin : IDalamudPlugin
 
     public void Dispose()
     {
+        AnyderService.Dispose();
         Gui?.Dispose();
 
         Svc.ClientState.TerritoryChanged -= TerritoryChanged;
@@ -1077,6 +1078,58 @@ public class ReMakePlacePlugin : IDalamudPlugin
 
         }
 
+    }
+
+    /// <summary>
+    /// Loads items into Anyder's SpawnedObjects for preview!
+    /// </summary>
+    public unsafe void PreviewItems()
+    {
+        AnyderService.ObjectManager.Clear();
+        
+        if (Memory.Instance.GetCurrentTerritory() == Memory.HousingArea.Indoors)
+        {
+            var queue = new Queue<HousingItem>(InteriorItemList);
+            RecursivelyPreviewInteriorItems(queue);
+        }
+    }
+    
+    public unsafe void RecursivelyPreviewInteriorItems(Queue<HousingItem> queue)
+    {
+        if (queue.Count == 0) return;
+        var item = queue.Dequeue();
+        if (HousingData.Instance.TryGetFurnitureByItemId(item.ItemKey, out var furniture))
+        {
+            var model = furniture.ModelKey;
+            var itemPath = $"bgcommon/hou/indoor/general/{model:0000}/asset/fun_b0_m{model:0000}.sgb";
+            
+            if (Svc.Data.GetExcelSheet<Stain>().TryGetRow(item.Stain, out var stain))
+            {
+                var color = UintToVector4(stain.Color);
+                Log($"Staining with {color}");
+                AnyderService.ObjectManager.Add(itemPath, item.GetLocation(), Quaternion.CreateFromAxisAngle(Vector3.UnitY, item.Rotate), Vector3.One, false, color);
+            }
+            else
+            {
+                AnyderService.ObjectManager.Add(itemPath, item.GetLocation(), Quaternion.CreateFromAxisAngle(Vector3.UnitY, item.Rotate), Vector3.One);
+            }
+            
+            Svc.Framework.RunOnTick(() => RecursivelyPreviewInteriorItems(queue));
+        }
+        else
+        {
+            LogError($"Cannot identify item: {item.Name}");
+        }
+    }
+    
+    private static Vector4 UintToVector4(uint color)
+    {
+        return new Vector4(
+            ((color >> 16) & 0xFF) / 255.0f,        // Red
+            ((color >> 8)  & 0xFF) / 255.0f,        // Green
+            (color         & 0xFF) / 255.0f,        // Blue
+            ((color >> 24) & 0xFF) / 255.0f      // Alpha
+        );
     }
 
     public unsafe void GetPlotLocation()

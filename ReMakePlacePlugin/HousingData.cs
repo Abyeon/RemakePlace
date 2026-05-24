@@ -10,6 +10,7 @@ public class HousingData
     public static HousingData Instance { get; private set; }
 
     private readonly Dictionary<uint, HousingFurniture> _furnitureDict;
+    private readonly Dictionary<uint, HousingFurniture> _itemFurnitureDict;
     private readonly Dictionary<uint, Item> _itemDict;
     private readonly Dictionary<uint, Stain> _stainDict;
 
@@ -67,6 +68,7 @@ public class HousingData
 
         _stainDict = Svc.Data.GetExcelSheet<Stain>().ToDictionary(row => row.RowId, row => row);
         _furnitureDict = Svc.Data.GetExcelSheet<HousingFurniture>().ToDictionary(row => row.RowId, row => row);
+        _itemFurnitureDict = Svc.Data.GetExcelSheet<HousingFurniture>().Where(furniture => furniture.Item.IsValid && furniture.Item.RowId != 0).ToDictionary(furniture => furniture.Item.RowId);
         _yardObjectDict = Svc.Data.GetExcelSheet<HousingYardObject>().ToDictionary(row => row.RowId, row => row);
 
         Svc.Log.Info($"Loaded {_furnitureDict.Keys.Count} furniture");
@@ -113,6 +115,11 @@ public class HousingData
     public bool TryGetFurniture(uint id, out HousingFurniture furniture)
     {
         return _furnitureDict.TryGetValue(id, out furniture);
+    }
+
+    public bool TryGetFurnitureByItemId(uint id, out HousingFurniture furniture)
+    {
+        return _itemFurnitureDict.TryGetValue(id, out furniture);
     }
 
     public bool IsUnitedExteriorPart(uint id, out Item item)
