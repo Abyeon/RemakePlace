@@ -1106,7 +1106,6 @@ public class ReMakePlacePlugin : IDalamudPlugin
             if (Svc.Data.GetExcelSheet<Stain>().TryGetRow(item.Stain, out var stain))
             {
                 var color = UintToVector4(stain.Color);
-                Log($"Staining with {color}");
                 AnyderService.ObjectManager.Add(itemPath, item.GetLocation(), Quaternion.CreateFromAxisAngle(Vector3.UnitY, item.Rotate), Vector3.One, false, color);
             }
             else
