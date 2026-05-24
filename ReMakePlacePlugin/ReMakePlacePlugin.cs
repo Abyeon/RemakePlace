@@ -1105,7 +1105,7 @@ public class ReMakePlacePlugin : IDalamudPlugin
             
             if (Svc.Data.GetExcelSheet<Stain>().TryGetRow(item.Stain, out var stain))
             {
-                var color = UintToVector4(stain.Color);
+                var color = Utils.StainToVector4(stain.Color);
                 AnyderService.ObjectManager.Add(itemPath, item.GetLocation(), Quaternion.CreateFromAxisAngle(Vector3.UnitY, item.Rotate), Vector3.One, false, color);
             }
             else
@@ -1119,16 +1119,6 @@ public class ReMakePlacePlugin : IDalamudPlugin
         {
             LogError($"Cannot identify item: {item.Name}");
         }
-    }
-    
-    private static Vector4 UintToVector4(uint color)
-    {
-        return new Vector4(
-            ((color >> 16) & 0xFF) / 255.0f,        // Red
-            ((color >> 8)  & 0xFF) / 255.0f,        // Green
-            (color         & 0xFF) / 255.0f,        // Blue
-            ((color >> 24) & 0xFF) / 255.0f      // Alpha
-        );
     }
 
     public unsafe void GetPlotLocation()
