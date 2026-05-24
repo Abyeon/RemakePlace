@@ -5,6 +5,8 @@ VisualStudioVersion = 17.13.35507.96
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReMakePlacePlugin", "ReMakePlacePlugin\ReMakePlacePlugin.csproj", "{B6FA9FC2-6132-E9AC-A13F-857A21BB98C3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Anyder", "Anyder\Anyder\Anyder.csproj", "{CB6851A3-B11D-4998-BC0B-AE18394B87B5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -15,6 +17,10 @@ Global
 		{B6FA9FC2-6132-E9AC-A13F-857A21BB98C3}.Debug|x64.Build.0 = Debug|x64
 		{B6FA9FC2-6132-E9AC-A13F-857A21BB98C3}.Release|x64.ActiveCfg = Release|x64
 		{B6FA9FC2-6132-E9AC-A13F-857A21BB98C3}.Release|x64.Build.0 = Release|x64
+		{CB6851A3-B11D-4998-BC0B-AE18394B87B5}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{CB6851A3-B11D-4998-BC0B-AE18394B87B5}.Debug|x64.Build.0 = Debug|Any CPU
+		{CB6851A3-B11D-4998-BC0B-AE18394B87B5}.Release|x64.ActiveCfg = Release|Any CPU
+		{CB6851A3-B11D-4998-BC0B-AE18394B87B5}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -48,4 +48,8 @@
 	  <PackageReference Update="DalamudPackager" Version="15.0.0" />
 	  <PackageReference Update="DotNet.ReproducibleBuilds" Version="2.0.2" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Anyder\Anyder\Anyder.csproj" />
+	</ItemGroup>
 </Project>

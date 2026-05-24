@@ -20,6 +20,7 @@ using System.Linq;
 using System.Numerics;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using Anyder;
 using static ReMakePlacePlugin.Memory;
 using AtkValueType = FFXIVClientStructs.FFXIV.Component.GUI.AtkValueType;
 using HousingFurniture = Lumina.Excel.Sheets.HousingFurniture;
@@ -77,6 +78,7 @@ public class ReMakePlacePlugin : IDalamudPlugin
 
     public ReMakePlacePlugin(IDalamudPluginInterface pi)
     {
+        AnyderService.Init(pi);
         ECommonsMain.Init(pi, this);
 
         Config = Svc.PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();

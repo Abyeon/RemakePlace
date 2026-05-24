@@ -19,6 +19,9 @@
         "requested": "[3.2.0.6, )",
         "resolved": "3.2.0.6",
         "contentHash": "ZONTpNsOLTlX0OPhBU/mHK9EWqmxgc2ZPwZtmV0rucsNyARXjeNsaGC9bcumGPBVpICTQBqeg4V1iew3OdmGYQ=="
+      },
+      "anyder": {
+        "type": "Project"
       }
     }
   }

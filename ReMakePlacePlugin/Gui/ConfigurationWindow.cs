@@ -159,12 +159,16 @@ public class ConfigurationWindow : Window, IDisposable
 
     private bool CheckModeForApplyDyes()
     {
-        if (!Memory.Instance.IsHousingMode() || !Memory.Instance.CanDyeItem())
-        {
-            LogError("Unable to load and apply dyes outside of Furnishing Color mode");
-            return false;
-        }
+        if (Memory.Instance.IsHousingMode() && Memory.Instance.CanDyeItem()) return true;
+        
+        LogError("Unable to load and apply dyes outside of Furnishing Color mode");
+        return false;
 
+    }
+
+    private bool CheckModeForPreview()
+    {
+        // TODO: Check if in correctly sized house
         return true;
     }
 
@@ -185,52 +189,65 @@ public class ConfigurationWindow : Window, IDisposable
 
     private void LoadLayoutFromFile(bool ApplyLayout = false)
     {
-        if (!Config.SaveLocation.IsNullOrEmpty())
+        if (Config.SaveLocation.IsNullOrEmpty()) return;
+        
+        try
         {
-            try
-            {
-                SaveLayoutManager.ImportLayout(Config.SaveLocation);
-                Log(String.Format("Imported {0} items", Plugin.InteriorItemList.Count + Plugin.ExteriorItemList.Count));
+            SaveLayoutManager.ImportLayout(Config.SaveLocation);
+            Log($"Imported {Plugin.InteriorItemList.Count + Plugin.ExteriorItemList.Count} items");
 
-                if (CheckModeForLoad(ApplyLayout))
-                {
-                    Plugin.MatchLayout();
-                    Config.ResetRecord();
-                    if (ApplyLayout)
-                        Plugin.ApplyLayout();
-                }
-                else
-                    Config.ResetRecord();
-            }
-            catch (Exception e)
+            if (CheckModeForLoad(ApplyLayout))
             {
-                LogError($"Load Error: {e.Message}", e.StackTrace);
+                Plugin.MatchLayout();
+                Config.ResetRecord();
+                if (ApplyLayout)
+                    Plugin.ApplyLayout();
             }
+            else
+                Config.ResetRecord();
+        }
+        catch (Exception e)
+        {
+            LogError($"Load Error: {e.Message}", e.StackTrace);
         }
     }
 
     private void ApplyDyesFromFile()
     {
-        if (!Config.SaveLocation.IsNullOrEmpty())
+        if (Config.SaveLocation.IsNullOrEmpty()) return;
+        
+        try
         {
-            try
-            {
-                SaveLayoutManager.ImportLayout(Config.SaveLocation);
-                Log(String.Format("Imported {0} items", Plugin.InteriorItemList.Count + Plugin.ExteriorItemList.Count));
+            SaveLayoutManager.ImportLayout(Config.SaveLocation);
+            Log($"Imported {Plugin.InteriorItemList.Count + Plugin.ExteriorItemList.Count} items");
 
-                if (CheckModeForApplyDyes())
-                {
-                    Plugin.MatchLayout();
-                    Config.ResetRecord();
-                    Plugin.ApplyDyes();
-                }
-                else
-                    Config.ResetRecord();
-            }
-            catch (Exception e)
+            if (CheckModeForApplyDyes())
             {
-                LogError($"Apply Dyes Error: {e.Message}", e.StackTrace);
+                Plugin.MatchLayout();
+                Config.ResetRecord();
+                Plugin.ApplyDyes();
             }
+            else
+                Config.ResetRecord();
+        }
+        catch (Exception e)
+        {
+            LogError($"Apply Dyes Error: {e.Message}", e.StackTrace);
+        }
+    }
+
+    private void ApplyPreviewFromFile()
+    {
+        if (Config.SaveLocation.IsNullOrEmpty()) return;
+
+        try
+        {
+            SaveLayoutManager.ImportLayout(Config.SaveLocation);
+            Log($"Imported {Plugin.InteriorItemList.Count + Plugin.ExteriorItemList.Count} items");
+        }
+        catch (Exception e)
+        {
+            
         }
     }
 
