@@ -16,6 +16,7 @@ using System.Linq;
 using System.Numerics;
 using System.Reflection;
 using Anyder;
+using ReMakePlacePlugin.Util;
 using static ReMakePlacePlugin.Gui.UiHelpers;
 using static ReMakePlacePlugin.ReMakePlacePlugin;
 
@@ -447,6 +448,7 @@ public class ConfigurationWindow : Window, IDisposable
             {
                 AnyderService.ObjectManager.Clear();
                 CurrentlyPreviewing = false;
+                PreviewUtils.ToggleFurniture(true);
             }
             else
             {

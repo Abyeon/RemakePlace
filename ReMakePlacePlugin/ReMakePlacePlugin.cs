@@ -1090,13 +1090,14 @@ public class ReMakePlacePlugin : IDalamudPlugin
         if (Instance.GetCurrentTerritory() == HousingArea.Indoors)
         {
             var queue = new Queue<HousingItem>(InteriorItemList);
-            RecursivelyPreviewInteriorItems(queue);
+            PreviewUtils.ToggleFurniture(false);
+            Svc.Framework.RunOnTick(() => RecursivelyPreviewInteriorItems(queue));
         }
         else if (Instance.GetCurrentTerritory() == HousingArea.Outdoors)
         {
             GetPlotLocation(); // update current plot
             var queue = new Queue<HousingItem>(ExteriorItemList);
-            RecursivelyPreviewExteriorItems(queue);
+            Svc.Framework.RunOnTick(() => RecursivelyPreviewExteriorItems(queue));
         }
     }
     
