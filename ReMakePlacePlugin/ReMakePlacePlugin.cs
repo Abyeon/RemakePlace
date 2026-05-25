@@ -49,8 +49,10 @@ public class ReMakePlacePlugin : IDalamudPlugin
 
     public delegate void InteractWithHousingItemDelegate(long agentHousingPtr, long unk);
     private static HookWrapper<InteractWithHousingItemDelegate> InteractWithHousingItemHook;
-
+    
     public static bool CurrentlyPlacingItems = false;
+
+    public static bool CurrentlyPreviewing = false;
 
     public static bool CurrentlyDyeingItems = false;
 
@@ -1081,20 +1083,24 @@ public class ReMakePlacePlugin : IDalamudPlugin
     }
 
     /// <summary>
-    /// Loads items into Anyder's SpawnedObjects for preview!
+    /// Uses Anyder to preview the currently opened housing layout.
     /// </summary>
-    public unsafe void PreviewItems()
+    public void PreviewItems()
     {
-        AnyderService.ObjectManager.Clear();
-        
-        if (Memory.Instance.GetCurrentTerritory() == Memory.HousingArea.Indoors)
+        if (Instance.GetCurrentTerritory() == HousingArea.Indoors)
         {
             var queue = new Queue<HousingItem>(InteriorItemList);
             RecursivelyPreviewInteriorItems(queue);
         }
+        else if (Instance.GetCurrentTerritory() == HousingArea.Outdoors)
+        {
+            GetPlotLocation(); // update current plot
+            var queue = new Queue<HousingItem>(ExteriorItemList);
+            RecursivelyPreviewExteriorItems(queue);
+        }
     }
     
-    public unsafe void RecursivelyPreviewInteriorItems(Queue<HousingItem> queue)
+    public static void RecursivelyPreviewInteriorItems(Queue<HousingItem> queue)
     {
         if (queue.Count == 0) return;
         var item = queue.Dequeue();
@@ -1103,21 +1109,50 @@ public class ReMakePlacePlugin : IDalamudPlugin
             var model = furniture.ModelKey;
             var itemPath = $"bgcommon/hou/indoor/general/{model:0000}/asset/fun_b0_m{model:0000}.sgb";
             
-            if (Svc.Data.GetExcelSheet<Stain>().TryGetRow(item.Stain, out var stain))
-            {
-                var color = Utils.StainToVector4(stain.Color);
-                AnyderService.ObjectManager.Add(itemPath, item.GetLocation(), Quaternion.CreateFromAxisAngle(Vector3.UnitY, item.Rotate), Vector3.One, false, color);
-            }
-            else
-            {
-                AnyderService.ObjectManager.Add(itemPath, item.GetLocation(), Quaternion.CreateFromAxisAngle(Vector3.UnitY, item.Rotate), Vector3.One);
-            }
+            var position = item.GetLocation();
+            var rotation = item.Rotate;
+            PreviewItem(itemPath, position, rotation, item.Stain);
             
             Svc.Framework.RunOnTick(() => RecursivelyPreviewInteriorItems(queue));
         }
         else
         {
             LogError($"Cannot identify item: {item.Name}");
+        }
+    }
+
+    public static void RecursivelyPreviewExteriorItems(Queue<HousingItem> queue)
+    {
+        if (queue.Count == 0) return;
+        var item = queue.Dequeue();
+        if (HousingData.Instance.TryGetYardObjectByItemId(item.ItemKey, out var furniture))
+        {
+            var model = furniture.ModelKey;
+            var itemPath = $"bgcommon/hou/outdoor/general/{model:0000}/asset/gar_b0_m{model:0000}.sgb";
+            
+            var rotateVector = Quaternion.CreateFromAxisAngle(Vector3.UnitY, -PlotLocation.rotation);
+            var position = Vector3.Transform(item.GetLocation(), rotateVector) + PlotLocation.ToVector();
+            var rotation = item.Rotate - PlotLocation.rotation;
+            PreviewItem(itemPath, position, rotation, item.Stain);
+            
+            Svc.Framework.RunOnTick(() => RecursivelyPreviewExteriorItems(queue));
+        }
+        else
+        {
+            LogError($"Cannot identify item: {item.Name}");
+        }
+    }
+
+    public static void PreviewItem(string path, Vector3 position, float rotation, byte stain)
+    {
+        if (Svc.Data.GetExcelSheet<Stain>().TryGetRow(stain, out var row))
+        {
+            var color = Utils.StainToVector4(row.Color);
+            AnyderService.ObjectManager.Add(path, position, Quaternion.CreateFromAxisAngle(Vector3.UnitY, rotation), Vector3.One, false, color);
+        }
+        else
+        {
+            AnyderService.ObjectManager.Add(path, position, Quaternion.CreateFromAxisAngle(Vector3.UnitY, rotation), Vector3.One);
         }
     }
 
@@ -1360,6 +1395,7 @@ public class ReMakePlacePlugin : IDalamudPlugin
 
     private void TerritoryChanged(uint territory)
     {
+        CurrentlyPreviewing = false;
         Config.DrawScreen = false;
         Config.Save();
     }

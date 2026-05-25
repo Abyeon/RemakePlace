@@ -15,6 +15,7 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
+using Anyder;
 using static ReMakePlacePlugin.Gui.UiHelpers;
 using static ReMakePlacePlugin.ReMakePlacePlugin;
 
@@ -243,10 +244,10 @@ public class ConfigurationWindow : Window, IDisposable
         try
         {
             SaveLayoutManager.ImportLayout(Config.SaveLocation);
-            Log($"Imported {Plugin.InteriorItemList.Count + Plugin.ExteriorItemList.Count} items");
             
-            if (CheckModeForPreview())
-                Plugin.PreviewItems();
+            if (!CheckModeForPreview()) return;
+            Plugin.PreviewItems();
+            CurrentlyPreviewing = true;
         }
         catch (Exception e)
         {
@@ -439,6 +440,19 @@ public class ConfigurationWindow : Window, IDisposable
         false,
         "Select a file to open",
         menuDimensions.X);
+        
+        DrawMainMenuButton(CurrentlyPreviewing ? "Stop Previewing" : "Preview", () =>
+        {
+            if (CurrentlyPreviewing)
+            {
+                AnyderService.ObjectManager.Clear();
+                CurrentlyPreviewing = false;
+            }
+            else
+            {
+                ApplyPreviewFromFile();
+            }
+        }, false, "Preview the layout!", menuDimensions.X);
 
         DrawMainMenuButton("Apply", () =>
         {
@@ -450,11 +464,10 @@ public class ConfigurationWindow : Window, IDisposable
         menuDimensions.X);
 
         var ctrlKeyPressed = ImGui.GetIO().KeyCtrl;
-        var dyeingItems = CurrentlyDyeingItems;
 
-        DrawMainMenuButton(dyeingItems ? "Stop Dyeing" : "Apply Dyes", () =>
+        DrawMainMenuButton(CurrentlyDyeingItems ? "Stop Dyeing" : "Apply Dyes", () =>
         {
-            if (dyeingItems)
+            if (CurrentlyDyeingItems)
             {
                 Plugin.StopDyeingItems();
             }
@@ -464,12 +477,10 @@ public class ConfigurationWindow : Window, IDisposable
                 ApplyDyesFromFile();
             }
         },
-        dyeingItems ? false : (Config.SaveLocation.IsNullOrEmpty() || !ctrlKeyPressed),
-        dyeingItems ? "Will stop applying Dyes to furnitures" :
+        CurrentlyDyeingItems ? false : (Config.SaveLocation.IsNullOrEmpty() || !ctrlKeyPressed),
+        CurrentlyDyeingItems ? "Will stop applying Dyes to furnitures" :
             (ctrlKeyPressed ? "Attempt to apply dyes, Furnishing Color window needs to be open" : "Hold CTRL to apply dyes"),
         menuDimensions.X);
-        
-        DrawMainMenuButton("Preview Layout", ApplyPreviewFromFile, false, "Preview the layout!", menuDimensions.X);
 
         //DrawMainMenuButton("Place Items Down", () =>
         //{
