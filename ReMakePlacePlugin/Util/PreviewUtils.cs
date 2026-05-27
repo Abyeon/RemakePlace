@@ -32,16 +32,8 @@ public static unsafe class PreviewUtils
             var group = obj->SharedGroupLayoutInstance;
             if (group == null) continue;
             
-            // Not the prettiest, but this is probably the easiest way to do this at the moment without making a whole other service.
-            var bgParts = group->Instances.Instances.Where(x => x.Value != null && x.Value->Instance->Id.Type == InstanceType.BgPart);
-            foreach (var instancePtr in bgParts)
-            {
-                var instance = instancePtr.Value;
-                if (instance == null) continue;
-                var graphics = (BgObject*)instance->Instance->GetGraphics();
-                if (graphics == null) continue;
-                graphics->SetTransparency(enabled ? 0 : 1);
-            }
+            group->SetActive(enabled);
+            group->SetColliderActive(true); // cool that this works :D
         }
     }
 }
