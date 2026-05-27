@@ -33,7 +33,7 @@ public static unsafe class PreviewUtils
             if (group == null) continue;
             
             group->SetActive(enabled);
-            group->SetColliderActive(true); // cool that this works :D
+            group->SetColliderActive(true); // cool that this works :D//
         }
     }
 }
