@@ -448,7 +448,8 @@ public class ConfigurationWindow : Window, IDisposable
             {
                 AnyderService.ObjectManager.Clear();
                 CurrentlyPreviewing = false;
-                PreviewUtils.ToggleFurniture(true);
+                if (Memory.Instance.GetCurrentTerritory() == Memory.HousingArea.Indoors)
+                    PreviewUtils.ToggleFurniture(true);
             }
             else
             {
