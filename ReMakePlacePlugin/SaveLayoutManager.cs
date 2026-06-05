@@ -68,7 +68,10 @@ public class Furniture : BasicItem
         if (properties.TryGetValue("color", out object colorObj))
         {
             var color = (string)colorObj;
-            return System.Drawing.ColorTranslator.FromHtml("#" + color.Substring(0, 6));
+            if (color.Length >= 6)
+            {
+                return System.Drawing.ColorTranslator.FromHtml("#" + color.Substring(0, 6));
+            }
         }
 
         return Color.Empty;
@@ -273,6 +276,7 @@ public class SaveLayoutManager
         {
             var material = furniture.GetMaterial();
             houseItem.MaterialItemKey = material.itemId;
+            houseItem.IsMaterial = true;
         }
 
         return houseItem;
@@ -516,6 +520,9 @@ public class SaveLayoutManager
                 case "h1":
                     district.name = "Minimalist";
                     break;
+                case "h2":
+                    district.name = "Dark Minimalist";
+                    break;
                 default:
                     break;
             }
@@ -559,9 +566,7 @@ public class SaveLayoutManager
                     basicItem.itemId = gameObject.MaterialItemKey;
                     furniture.properties.Add("material", basicItem);
                 }
-
             }
-
 
             furnitureList.Add(furniture);
         }

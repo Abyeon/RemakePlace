@@ -1,6 +1,7 @@
 ﻿using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.MJI;
+using FFXIVClientStructs.FFXIV.Client.LayoutEngine;
 using Lumina.Excel.Sheets;
 using System;
 using System.Collections.Generic;
@@ -34,13 +35,12 @@ public unsafe class Memory
     {
         try
         {
-            placeAnywhere = Svc.SigScanner.ScanText("C6 ?? ?? ?? 00 00 00 8B FE 48 89") + 6;
+            placeAnywhere = Svc.SigScanner.ScanText("C6 83 ?? ?? ?? ?? ?? 0F 29 44 24") + 6;
             wallAnywhere = Svc.SigScanner.ScanText("48 85 C0 74 ?? C6 87 ?? ?? 00 00 00") + 11;
             wallmountAnywhere = Svc.SigScanner.ScanText("c6 87 83 01 00 00 00 48 83 c4 ??") + 6;
 
             HousingModulePtr = Svc.SigScanner.GetStaticAddressFromSig("48 8B 05 ?? ?? ?? ?? 8B 52");
             LayoutWorldPtr = Svc.SigScanner.GetStaticAddressFromSig("48 8B D1 48 8B 0D ?? ?? ?? ?? 48 85 C9 74 0A", 3);
-
         }
         catch (Exception e)
         {
@@ -77,20 +77,20 @@ public unsafe class Memory
         if (!Svc.Data.GetExcelSheet<TerritoryType>().TryGetRow(territoryId, out var row)) return null;
 
         var placeName = row.Name.ToString();
-        var sizeName = placeName.Substring(1, 3);
+        var sizeName = placeName.Substring(2, 2);
 
         switch (sizeName)
         {
-            case "1i1":
+            case "i1":
                 return "Small";
 
-            case "1i2":
+            case "i2":
                 return "Medium";
 
-            case "1i3":
+            case "i3":
                 return "Large";
 
-            case "1i4":
+            case "i4":
                 return "Apartment";
 
             default:
@@ -168,28 +168,35 @@ public unsafe class Memory
         var objectListAddr = (IntPtr)(&mgr->ObjectList);
         var activeObjList = (IntPtr)(mgr->Objects) - 0x08;
 
-        var exteriorItems = Memory.GetContainer(InventoryType.HousingExteriorPlacedItems);
-
-        for (int i = 0; i < exteriorItems->Size; i++)
+        var exteriorItemInventories = new[]
         {
-            var item = exteriorItems->GetInventorySlot(i);
-            if (item == null || item->ItemId == 0) continue;
+            (InventoryType.HousingExteriorPlacedItems, 0),
+            (InventoryType.HousingExteriorPlacedItems2, 40)
+        };
 
-            var itemInfoIndex = GetYardIndex(mgr->Plot, (byte)i);
-
-            var itemInfo = HousingObjectManager.GetItemInfo(mgr, itemInfoIndex);
-            if (itemInfo == null) continue;
-
-            var gameObj = (HousingGameObject*)GetObjectFromIndex(activeObjList, (uint)itemInfo->Index);
-            if (gameObj == null) gameObj = (HousingGameObject*)GetGameObject(objectListAddr, itemInfoIndex);
-
-            if (gameObj != null)
+        foreach (var (exteriorItemInventory, offset) in exteriorItemInventories)
+        {
+            var exteriorItemContainer = Memory.GetContainer(exteriorItemInventory);
+            for (int i = 0; i < exteriorItemContainer->Size; i++)
             {
-                objects.Add(*gameObj);
+                var item = exteriorItemContainer->GetInventorySlot(i);
+                if (item == null || item->ItemId == 0) continue;
+
+                var itemInfoIndex = GetYardIndex(mgr->Plot, (byte)(i + offset));
+
+                var itemInfo = HousingObjectManager.GetItemInfo(mgr, itemInfoIndex);
+                if (itemInfo == null) continue;
+
+                var gameObj = (HousingGameObject*)GetObjectFromIndex(activeObjList, (uint)itemInfo->Index);
+                if (gameObj == null) gameObj = (HousingGameObject*)GetGameObject(objectListAddr, itemInfoIndex);
+
+                if (gameObj != null)
+                {
+                    objects.Add(*gameObj);
+                }
+
             }
-
         }
-
         return objects;
     }
 
@@ -220,7 +227,7 @@ public unsafe class Memory
 
         objects = new List<HousingGameObject>();
 
-        for (var i = 0; i < 400; i++)
+        for (var i = 0; i < 600; i++)
         {
             var oPtr = HousingModule->GetCurrentManager()->Objects[i];
             if (oPtr == 0)
