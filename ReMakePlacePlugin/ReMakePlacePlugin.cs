@@ -1146,7 +1146,7 @@ public class ReMakePlacePlugin : IDalamudPlugin
 
     public static void PreviewItem(string path, Vector3 position, float rotation, byte stain)
     {
-        if (Svc.Data.GetExcelSheet<Stain>().TryGetRow(stain, out var row))
+        if (stain != 0 && Svc.Data.GetExcelSheet<Stain>().TryGetRow(stain, out var row))
         {
             var color = Utils.StainToVector4(row.Color);
             AnyderService.ObjectManager.Add(path, position, Quaternion.CreateFromAxisAngle(Vector3.UnitY, rotation), Vector3.One, false, color);
