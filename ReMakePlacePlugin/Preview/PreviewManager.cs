@@ -33,7 +33,7 @@ public class PreviewManager : IDisposable
     private void OnZoneInit(ZoneInitEventArgs obj)
     {
         IsPreviewing = false;
-        Task.Run(() => Clear());
+        Clear();
     }
     
     /// <summary>
