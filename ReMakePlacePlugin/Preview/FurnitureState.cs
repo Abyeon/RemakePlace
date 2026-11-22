@@ -15,7 +15,7 @@ public struct FurnitureState
 {
     public HousingObjectId Id;
 
-    private readonly bool[] _enabledModels;
+    private readonly bool[] _enabledInstances;
 
     public unsafe FurnitureState(Pointer<HousingObject> obj)
     {
@@ -25,19 +25,19 @@ public struct FurnitureState
         SharedGroupLayoutInstance* group = obj.Value->SharedGroupLayoutInstance;
         if (group is null)
         {
-            _enabledModels = [];
+            _enabledInstances = [];
             return;
         }
 
         ref StdVector<Pointer<ChildNodeInstance>> instances = ref group->Instances.Instances;
-        _enabledModels = new bool[instances.Count];
+        _enabledInstances = new bool[instances.Count];
 
         for (int i = 0; i < instances.Count; i++)
         {
             Pointer<ChildNodeInstance> ptr = instances[i];
             if (ptr.IsNull) continue;
             if (!ptr.Value->Instance->IsActive) continue;
-            _enabledModels[i] = true;
+            _enabledInstances[i] = true;
         }
     }
 
@@ -53,7 +53,7 @@ public struct FurnitureState
         {
             Pointer<ChildNodeInstance> ptr = instances[i];
             if (ptr.IsNull) continue;
-            ptr.Value->Instance->SetActive(_enabledModels[i]);
+            ptr.Value->Instance->SetActive(_enabledInstances[i]);
         }
     }
 }
