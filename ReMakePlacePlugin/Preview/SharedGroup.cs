@@ -264,7 +264,6 @@ public class SharedGroup : IDisposable
         try
         {
             Memory.SharedGroupLayoutFunctions.TryLoadMaterial(Data.Value, slot, key);
-            UpdateTransform();
             Svc.Log.Verbose($"Successfully loaded material {key}");
         }
         catch (Exception e)
@@ -286,7 +285,6 @@ public class SharedGroup : IDisposable
         try
         {
             Memory.SharedGroupLayoutFunctions.TryLoadSubMaterial(Data.Value, slot, key, subKey);
-            UpdateTransform();
             Svc.Log.Verbose($"Successfully loaded sub material {key}");
         }
         catch (Exception e)
@@ -308,7 +306,6 @@ public class SharedGroup : IDisposable
         try
         {
             Memory.SharedGroupLayoutFunctions.TryLoadAquariumData(Data.Value, slot, key, size);
-            UpdateTransform();
             Svc.Log.Verbose($"Successfully loaded aquarium data {key}");
         }
         catch (Exception e)
