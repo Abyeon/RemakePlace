@@ -211,12 +211,13 @@ public class SharedGroup : IDisposable
         Svc.Log.Verbose($"Applying stain {Color} to {Path}");
         if (Data == null || TrySetColor(Color))
         {
-            Svc.Log.Verbose($"Successfully applied stain!");
+            Svc.Log.Verbose("Successfully applied stain!");
+            UpdateTransform(); // fixes spinning enigma partitions... LOL
             Svc.Framework.Update -= ApplyStainTask;
             return;
         }
         
-        Svc.Log.Verbose($"Failed to apply stain, attempting again..");
+        Svc.Log.Verbose("Failed to apply stain, attempting again..");
         Svc.Framework.Update += ApplyStainTask;
     }
 
@@ -232,7 +233,7 @@ public class SharedGroup : IDisposable
         }
     }
 
-    // for some reason necessary, using ->GetGraphics on SGLs just doesnt work.
+    // for some reason necessary, using ->GetGraphics on SGLs just doesn't work.
     private unsafe Pointer<BgObject> GetGraphics()
     {
         foreach (Pointer<ChildNodeInstance> ptr in Data.Value->Instances.Instances)
