@@ -429,7 +429,7 @@ public class ConfigurationWindow : Window, IDisposable
             {
                 Svc.Framework.Run(() => Plugin.PreviewManager.Clear());
                 if (Memory.Instance.GetCurrentTerritory() == Memory.HousingArea.Indoors)
-                    PreviewManager.ToggleRealFurniture(true);
+                    Plugin.PreviewManager.ToggleRealFurniture(true);
             }
             else
             {

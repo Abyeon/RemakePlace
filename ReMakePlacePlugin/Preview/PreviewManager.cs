@@ -36,11 +36,13 @@ public class PreviewManager : IDisposable
         Clear();
     }
     
+    private readonly Dictionary<int, FurnitureState> _cachedFurnitureStates = new();
+    
     /// <summary>
     /// Toggles the current furniture's visibility while retaining player interaction.
     /// </summary>
     /// <param name="enabled">Whether the furniture should be visible</param>
-    public static unsafe void ToggleRealFurniture(bool enabled)
+    public unsafe void ToggleRealFurniture(bool enabled)
     {
         HousingManager* man = HousingManager.Instance();
         if (man is null) return;
@@ -71,18 +73,37 @@ public class PreviewManager : IDisposable
             var obj = (HousingObject*)arr.Objects[index].Value;
             if (obj == null) continue;
 
-            if (!Memory.Instance.IsHousingMode() && HousingData.Instance.TryGetFurniture(obj->HousingObjectId.Id, out var furn))
-            {
-                // Skip Mannequin and Vendors
-                if (furn.UsageType is 15 or 3) continue;
-            }
+            // if (!Memory.Instance.IsHousingMode() && HousingData.Instance.TryGetFurniture(obj->HousingObjectId.Id, out var furn))
+            // {
+            //     // Skip Mannequin and Vendors
+            //     if (furn.UsageType is 15 or 3) continue;
+            // }
 
             SharedGroupLayoutInstance* group = obj->SharedGroupLayoutInstance;
             if (group == null) continue;
-            
-            group->SetActive(enabled);
-            group->SetColliderActive(true); // cool that this works :D
+
+            switch (enabled)
+            {
+                case true:
+                    if (!_cachedFurnitureStates.TryGetValue(index, out var state) || state.Id != obj->HousingObjectId)
+                    {
+                        group->SetActive(true);
+                        break;
+                    }
+                    
+                    state.ApplyStateTo(obj);
+                    break;
+                case false:
+                    _cachedFurnitureStates.Add(index, new FurnitureState(obj));
+                    
+                    group->SetActive(false);
+                    group->SetColliderActive(true); // cool that this works :D
+                    break;
+            }
         }
+        
+        // Clear the cached furniture after stopping preview
+        if (enabled) _cachedFurnitureStates.Clear();
     }
     
     /// <summary>
