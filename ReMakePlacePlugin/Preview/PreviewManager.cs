@@ -85,7 +85,7 @@ public class PreviewManager : IDisposable
             switch (enabled)
             {
                 case true:
-                    if (!_cachedFurnitureStates.TryGetValue(index, out var state) || state.Id != obj->HousingObjectId)
+                    if (!_cachedFurnitureStates.TryGetValue(index, out var state))
                     {
                         group->SetActive(true);
                         break;

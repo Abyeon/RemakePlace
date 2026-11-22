@@ -48,6 +48,12 @@ public struct FurnitureState
         SharedGroupLayoutInstance* group = obj.Value->SharedGroupLayoutInstance;
         if (group is null) return;
 
+        if (obj.Value->HousingObjectId != Id)
+        {
+            group->SetActive(true);
+            return;
+        }
+
         ref StdVector<Pointer<ChildNodeInstance>> instances = ref group->Instances.Instances;
         for (int i = 0; i < instances.Count; i++)
         {
