@@ -42,7 +42,8 @@ public class SharedGroup : IDisposable
     }
 
     public string Path { get; init; } = string.Empty;
-    public ushort MaterialKey { get; set; } = 0;
+    public ushort MaterialKey { get; init; } = 0;
+    public bool Variant { get; init; } = false;
 
     public SharedGroup(string path, CancellationToken token = new())
     {
@@ -138,6 +139,7 @@ public class SharedGroup : IDisposable
         Data.Value->SetActive(true); // Doing this specifically fixes mannequin models not spawning- however if it causes issues down the road we may have to remove this line
         Data.Value->SetTransformImpl(transform);
         Data.Value->SetColliderActive(false);
+        if (Variant) Data.Value->PlayTimeline(1, 0); // seems you need to apply this after updating transform
         
         // Some notes on this masking approach:
         // - Preview furniture will cause pumps / snapping to occur with real furniture
@@ -262,6 +264,7 @@ public class SharedGroup : IDisposable
         try
         {
             Memory.SharedGroupLayoutFunctions.TryLoadMaterial(Data.Value, slot, key);
+            UpdateTransform();
             Svc.Log.Verbose($"Successfully loaded material {key}");
         }
         catch (Exception e)
@@ -283,6 +286,7 @@ public class SharedGroup : IDisposable
         try
         {
             Memory.SharedGroupLayoutFunctions.TryLoadSubMaterial(Data.Value, slot, key, subKey);
+            UpdateTransform();
             Svc.Log.Verbose($"Successfully loaded sub material {key}");
         }
         catch (Exception e)
@@ -304,6 +308,7 @@ public class SharedGroup : IDisposable
         try
         {
             Memory.SharedGroupLayoutFunctions.TryLoadAquariumData(Data.Value, slot, key, size);
+            UpdateTransform();
             Svc.Log.Verbose($"Successfully loaded aquarium data {key}");
         }
         catch (Exception e)

@@ -76,7 +76,7 @@ public class Furniture : BasicItem
 
         return Color.Empty;
     }
-
+    
     public BasicItem GetMaterial()
     {
         if (properties.TryGetValue("material", out object materialObj))
@@ -89,6 +89,16 @@ public class Furniture : BasicItem
         }
 
         return new BasicItem();
+    }
+
+    public bool GetConsumed()
+    {
+        if (properties.TryGetValue("consumed", out object consumedObj))
+        {
+            return (bool)consumedObj;
+        }
+
+        return false;
     }
 
     int ColorDiff(Color c1, Color c2)
@@ -278,6 +288,8 @@ public class SaveLayoutManager
             houseItem.MaterialItemKey = material.itemId;
             houseItem.IsMaterial = true;
         }
+
+        houseItem.IsConsumed = furniture.GetConsumed();
 
         return houseItem;
     }

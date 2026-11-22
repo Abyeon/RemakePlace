@@ -72,13 +72,7 @@ public class PreviewManager : IDisposable
             
             var obj = (HousingObject*)arr.Objects[index].Value;
             if (obj == null) continue;
-
-            // if (!Memory.Instance.IsHousingMode() && HousingData.Instance.TryGetFurniture(obj->HousingObjectId.Id, out var furn))
-            // {
-            //     // Skip Mannequin and Vendors
-            //     if (furn.UsageType is 15 or 3) continue;
-            // }
-
+            
             SharedGroupLayoutInstance* group = obj->SharedGroupLayoutInstance;
             if (group == null) continue;
 
@@ -138,7 +132,8 @@ public class PreviewManager : IDisposable
     /// <param name="rotation">Rotation of the furniture</param>
     /// <param name="stain">RowId for the stain to use</param>
     /// <param name="materialItem">The Item rowId for the material used (Wallpaper, paintings, etc.)</param>
-    public void PreviewItem(string path, Vector3 position, float rotation, byte stain, uint materialItem)
+    /// <param name="variant">Whether this item has been toggled to a different state (plays timeline index 1)</param>
+    public void PreviewItem(string path, Vector3 position, float rotation, byte stain, uint materialItem, bool variant)
     {
         if (materialItem != 0)
         {
@@ -150,7 +145,7 @@ public class PreviewManager : IDisposable
                     MaterialKey = materialKey,
                     Position = position,
                     Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitY, rotation),
-                    Scale = Vector3.One
+                    Variant = variant
                 });
 
                 return;
@@ -164,7 +159,7 @@ public class PreviewManager : IDisposable
                 Color = Utils.StainToVector4(row.Color),
                 Position = position,
                 Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitY, rotation),
-                Scale = Vector3.One
+                Variant = variant
             });
 
             return;
@@ -174,7 +169,7 @@ public class PreviewManager : IDisposable
         {
             Position = position,
             Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitY, rotation),
-            Scale = Vector3.One
+            Variant = variant
         });
     }
 
@@ -196,13 +191,7 @@ public class PreviewManager : IDisposable
             {
                 ushort model = furniture.ModelKey;
                 string itemPath = $"bgcommon/hou/indoor/general/{model:0000}/asset/fun_b0_m{model:0000}.sgb";
-            
-                var position = item.GetLocation();
-                float rotation = item.Rotate;
-                byte stain = item.Stain;
-                uint materialItem = item.MaterialItemKey;
-                
-                PreviewItem(itemPath, position, rotation, stain, materialItem);
+                PreviewItem(itemPath, item.GetLocation(), item.Rotate, item.Stain, item.MaterialItemKey, item.IsConsumed);
             }
             else
             {
@@ -228,8 +217,7 @@ public class PreviewManager : IDisposable
                 var rotateVector = Quaternion.CreateFromAxisAngle(Vector3.UnitY, -ReMakePlacePlugin.PlotLocation.rotation);
                 var position = Vector3.Transform(item.GetLocation(), rotateVector) + ReMakePlacePlugin.PlotLocation.ToVector();
                 float rotation = item.Rotate - ReMakePlacePlugin.PlotLocation.rotation;
-                byte stain = item.Stain;
-                PreviewItem(itemPath, position, rotation, stain, item.MaterialItemKey);
+                PreviewItem(itemPath, position, rotation, item.Stain, item.MaterialItemKey, item.IsConsumed);
             }
             else
             {

@@ -10,6 +10,7 @@ public class HousingItem
     public byte Stain;
     public uint MaterialItemKey = 0;
     public bool IsMaterial = false;
+    public bool IsConsumed = false;
     public float X;
     public float Y;
     public float Z;
