@@ -42,8 +42,8 @@ public class SharedGroup : IDisposable
     }
 
     public string Path { get; init; } = string.Empty;
-    public ushort MaterialKey { get; init; } = 0;
-    public bool Variant { get; init; } = false;
+    public ushort MaterialKey { get; init; }
+    public bool Variant { get; init; }
 
     public SharedGroup(string path, CancellationToken token = new())
     {
@@ -55,12 +55,11 @@ public class SharedGroup : IDisposable
 
         Path = path;
         Token = token;
+    }
 
-        if (!TryCreateSharedGroup())
-        {
-            return;
-        }
-        
+    public void Spawn()
+    {
+        if (!TryCreateSharedGroup()) return;
         Task.Run(Init, Token);
     }
 
@@ -90,13 +89,10 @@ public class SharedGroup : IDisposable
         if (Token.IsCancellationRequested) return;
         if (Data.IsNull) throw new InvalidOperationException("Data is null");
     
-        bool loaded = IsLoaded();
-    
-        while (!loaded)
+        while (!IsLoaded())
         {
             if (Token.IsCancellationRequested) return;
-            loaded = IsLoaded();
-            await Task.Delay(16, Token).ConfigureAwait(false);
+            await Svc.Framework.DelayTicks(1, Token).ConfigureAwait(false);
         }
     
         await Svc.Framework.Run(OnLoad, Token);
@@ -108,7 +104,6 @@ public class SharedGroup : IDisposable
     {
         UpdateTransform();
         
-        if (MaterialKey != 0) LoadMaterial(0, MaterialKey);
         // Lil example for loading aquarium stuff.
         // if (Path.Contains("fun_b0_m0655"))
         // {
@@ -117,8 +112,11 @@ public class SharedGroup : IDisposable
         //     LoadAquariumData(2, 116, 3); // Slot 2-5 Fishies
         //     LoadAquariumData(3, 578, 0);
         // }
+
+        ApplyStainTask(null!);
+        // LoadMaterial(0, MaterialKey);
         
-        Svc.Framework.RunOnTick(() => ApplyStainTask(null!), delayTicks: 1, cancellationToken: Token);
+        // Svc.Framework.RunOnTick(() => ApplyStainTask(null!), delayTicks: 1, cancellationToken: Token);
     }
 
     private unsafe bool IsLoaded()
@@ -214,6 +212,7 @@ public class SharedGroup : IDisposable
         if (Data == null || TrySetColor(Color))
         {
             Svc.Log.Verbose("Successfully applied stain!");
+            LoadMaterial(0, MaterialKey);
             UpdateTransform(); // fixes spinning enigma partitions... LOL
             Svc.Framework.Update -= ApplyStainTask;
             return;

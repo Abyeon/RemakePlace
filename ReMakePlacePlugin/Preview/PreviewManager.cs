@@ -239,7 +239,11 @@ public class PreviewManager : IDisposable
     public SharedGroup this[uint id] => Furniture[id];
 
     public void Add(SharedGroup sharedGroup) => Add(sharedGroup.Id, sharedGroup);
-    public void Add(uint id, SharedGroup sharedGroup) => Furniture.Add(id, sharedGroup);
+    public void Add(uint id, SharedGroup sharedGroup)
+    {
+        Furniture.Add(id, sharedGroup);
+        sharedGroup.Spawn();
+    }
     
     public bool Remove(SharedGroup sharedGroup) => Remove(sharedGroup.Id, out _);
     public bool Remove(uint id, out SharedGroup? sharedGroup) => Furniture.Remove(id, out sharedGroup);
