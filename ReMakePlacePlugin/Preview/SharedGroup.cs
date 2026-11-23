@@ -136,8 +136,8 @@ public class SharedGroup : IDisposable
         
         Data.Value->SetActive(true); // Doing this specifically fixes mannequin models not spawning- however if it causes issues down the road we may have to remove this line
         Data.Value->SetTransformImpl(transform);
-        Data.Value->SetColliderActive(false);
         if (Variant) Data.Value->PlayTimeline(1, 0); // seems you need to apply this after updating transform
+        Data.Value->SetColliderActive(false);
         
         // Some notes on this masking approach:
         // - Preview furniture will cause pumps / snapping to occur with real furniture
